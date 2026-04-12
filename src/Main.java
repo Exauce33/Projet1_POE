@@ -18,7 +18,7 @@ public class Main {
             System.out.println("Enter your Username (Please ensure that the username must include an underscore(_) and be no longer than five characters): ");
             username = scanner.nextLine();
             if (registration.checkUserName(username)) {
-                System.out.println(" username successfully captured.");
+                System.out.println("Username successfully captured.");
                 break;
             }
             System.out.println("Username is not correctly formatted; please follow the instruction. \nTry again!\n");
@@ -28,7 +28,7 @@ public class Main {
         String password = "";
         while (true) {
             System.out.println("set up your password \nRules: 8 characters min, 1capital letter, 1number, 1special character.\n");
-            System.out.print("\nEnter your password: ");
+            System.out.print("Enter your password: ");
             password = scanner.nextLine();
             if (registration.checkPassword(password)) {
                 System.out.println("Password successfully captured.");
@@ -73,7 +73,7 @@ public class Main {
         }
 
     }
-        System.out.println("Welcome" + firstname + lastname +" is great to see you." );
+        System.out.println("Login completed\n" );
     }
 }
 
