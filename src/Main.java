@@ -15,7 +15,7 @@ public class Main {
         // Username Loop
         String username = "";
         while (true) {
-            System.out.println("Enter your Username (Please ensure that the username must include an underscore(_) and be no longer than five characters): ");
+            System.out.println("\nEnter your Username (Please ensure that the username must include an underscore(_) and not be longer than five characters): ");
             username = scanner.nextLine();
             if (registration.checkUserName(username)) {
                 System.out.println("Username successfully captured.");
@@ -27,7 +27,7 @@ public class Main {
         // Password Loop
         String password = "";
         while (true) {
-            System.out.println("set up your password \nRules: 8 characters min, 1capital letter, 1number, 1special character.\n");
+            System.out.println("\nset up your password \nRules: 8 characters min, 1capital letter, 1number, 1special character.\n");
             System.out.print("Enter your password: ");
             password = scanner.nextLine();
             if (registration.checkPassword(password)) {
@@ -38,10 +38,10 @@ public class Main {
         }
 
         // Phone Loop
-        // Ref Phone number:https://www.youtube.com/watch?v=2M1CpEJZ6rk
+        // Source: YouTube Tutorial; URL: [https://www.youtube.com/watch?v=2M1CpEJZ6rk]
         String phone = "";
         while (true) {
-            System.out.print("Enter phone (e.g., +27123456789): ");
+            System.out.println("\nEnter phone (e.g., +27123456789): ");
             phone = scanner.nextLine();
             if (registration.checkCellPhoneNumber(phone)) {
                 System.out.println("Phone number valid!");
