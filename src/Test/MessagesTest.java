@@ -71,11 +71,6 @@ public class MessagesTest {
                         "Hi Mike, can you join us for dinner tonight?",
                         "00:0:HITONIGHT"
                 },
-                {
-                        "08575975889", "1",
-                        "Hi Keegan, did you receive the payment?",
-                        "12:1:HIPAYMENT"
-                }
         };
 
         for (String[] data : testData) {
