@@ -6,7 +6,6 @@ public class Main {
         Registration registration = new Registration();
         login auth = new login();
 
-
         //  PART 1 — Inscription
         System.out.println("--- REGISTRATION ---");
         System.out.print("Enter your first name: ");
@@ -75,7 +74,6 @@ public class Main {
         }
         System.out.println("Login completed\n");
 
-
         //  PART 2 — QuickChat
 
         System.out.println("\nWelcome to QuickChat.");
@@ -91,7 +89,8 @@ public class Main {
             System.out.println("\n========== MENU ==========");
             System.out.println("1) Send Messages");
             System.out.println("2) Show recently sent messages");
-            System.out.println("3) Quit");
+            System.out.println("3) Stored Messages");   // PART 3 — new menu option
+            System.out.println("4) Quit");               // PART 3 — Quit moved to option 4
             System.out.print("Choose an option: ");
             String menuChoice = scanner.nextLine().trim();
 
@@ -151,6 +150,7 @@ public class Main {
 
                     } else if ("2".equals(action)) {
                         msg.setStatus("Disregarded");
+                        messagesManager.addMessage(msg);   // PART 3 to store disregarded messages in array
 
                     } else if ("3".equals(action)) {
                         msg.setStatus("Stored");
@@ -162,16 +162,71 @@ public class Main {
                     break;
 
                 case "2":
-                    System.out.println("Coming Soon.");
+                    // PART 3  Display sender and recipient of all sent messages
+                    System.out.println("\n RECENTLY SENT MESSAGES ");
+                    System.out.println(messagesManager.displaySendersAndRecipients());
                     break;
 
                 case "3":
+                    // PART 3  Stored Messages sub-menu
+                    messagesManager.loadStoredMessagesFromJSON();   // read JSON into stored array
+                    boolean inStoredMenu = true;
+                    while (inStoredMenu) {
+                        System.out.println("\n STORED MESSAGES MENU ");
+                        System.out.println("a) Display sender & recipient of all stored messages");
+                        System.out.println("b) Display the longest message");
+                        System.out.println("c) Search for a Message ID");
+                        System.out.println("d) Search all messages for a recipient");
+                        System.out.println("e) Delete a message using its hash");
+                        System.out.println("f) Display full report");
+                        System.out.println("q) Back to main menu");
+                        System.out.print("Choose: ");
+                        String sub = scanner.nextLine().trim().toLowerCase();
+
+                        switch (sub) {
+                            case "a":
+                                // a) Sender and recipient of all stored messages
+                                System.out.println(messagesManager.displaySendersAndRecipients());
+                                break;
+                            case "b":
+                                // b) Longest message
+                                System.out.println("Longest message: " + messagesManager.displayLongestMessage());
+                                break;
+                            case "c":
+                                // c) Search by Message ID
+                                System.out.print("Enter Message ID: ");
+                                System.out.println(messagesManager.searchByMessageID(scanner.nextLine()));
+                                break;
+                            case "d":
+                                // d) Search by recipient
+                                System.out.print("Enter recipient: ");
+                                System.out.println(messagesManager.searchByRecipient(scanner.nextLine()));
+                                break;
+                            case "e":
+                                // e) Delete by hash
+                                System.out.print("Enter message hash: ");
+                                System.out.println(messagesManager.deleteByHash(scanner.nextLine()));
+                                break;
+                            case "f":
+                                // f) Full report
+                                System.out.println(messagesManager.displayReport());
+                                break;
+                            case "q":
+                                inStoredMenu = false;
+                                break;
+                            default:
+                                System.out.println("Invalid option.");
+                        }
+                    }
+                    break;
+
+                case "4":
                     running = false;
                     System.out.println("\nGoodbye!");
                     break;
 
                 default:
-                    System.out.println("Invalid option. Please enter 1, 2, or 3.");
+                    System.out.println("Invalid option. Please enter 1, 2, 3, or 4.");
             }
         }
 
@@ -182,3 +237,4 @@ public class Main {
 
     }
 }
+

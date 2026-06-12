@@ -12,7 +12,13 @@ import java.util.Random;
 
 public class Messages {
 
-    private final List<Message> messageList = new ArrayList<>();
+    // ===== ARRAYS (Part 3) =====
+    private final List<Message> sentMessages        = new ArrayList<>();
+    private final List<Message> disregardedMessages = new ArrayList<>();
+    private final List<Message> storedMessages      = new ArrayList<>();
+    private final List<String>  messageHashes       = new ArrayList<>();
+    private final List<String>  messageIDs          = new ArrayList<>();
+
     private int numMessagesSent = 0;
 
     // Generates a 10-digit ID
@@ -23,7 +29,7 @@ public class Messages {
         return String.valueOf(id);
     }
 
-    // Check that the ID is no longer than 10 characters.
+    // Check that the ID is no longer than 10 characters
     public boolean checkMessageID(String messageID) {
         return messageID != null && messageID.length() <= 10;
     }
@@ -64,62 +70,165 @@ public class Messages {
         return "Invalid selection. Please choose 1, 2, or 3.";
     }
 
-    // Add a message to the list
+    // Add a message to the correct array based on its status
     public void addMessage(Message msg) {
-        messageList.add(msg);
-        if ("Sent".equals(msg.getStatus())) {
+        String status = msg.getStatus();
+        if ("Sent".equals(status)) {
+            sentMessages.add(msg);
             numMessagesSent++;
+        } else if ("Stored".equals(status)) {
+            storedMessages.add(msg);
+        } else if ("Disregarded".equals(status)) {
+            disregardedMessages.add(msg);
         }
+        // Track hash and ID for every message
+        messageHashes.add(msg.getMessageHash());
+        messageIDs.add(msg.getMessageID());
     }
 
-    // Returns all sent messages
-    public String printMessages() {
+    // a) Sender and recipient of ALL sent messages
+    public String displaySendersAndRecipients() {
         StringBuilder sb = new StringBuilder();
-        for (Message m : messageList) {
-            if ("Sent".equals(m.getStatus())) {
-                sb.append("Message ID   : ").append(m.getMessageID()).append("\n");
-                sb.append("Message Hash : ").append(m.getMessageHash()).append("\n");
-                sb.append("Recipient    : ").append(m.getRecipient()).append("\n");
-                sb.append("Message      : ").append(m.getMessageText()).append("\n");
-                sb.append("-".repeat(40)).append("\n");
+        for (Message m : sentMessages) {
+            sb.append("Recipient: ").append(m.getRecipient())
+                    .append(" | Message: ").append(m.getMessageText()).append("\n");
+        }
+        return sb.length() == 0 ? "No sent messages." : sb.toString();
+    }
+
+    // b) Longest message (sent + stored)
+    public String displayLongestMessage() {
+        Message longest = null;
+        List<Message> all = new ArrayList<>();
+        all.addAll(sentMessages);
+        all.addAll(storedMessages);
+
+        for (Message m : all) {
+            if (longest == null || m.getMessageText().length() > longest.getMessageText().length()) {
+                longest = m;
             }
         }
-        return sb.length() == 0 ? "No messages sent." : sb.toString();
+        return (longest == null) ? "No messages found." : longest.getMessageText();
     }
 
-    // Returns the total number of messages sent.
+    // c) Search by Message ID -> returns recipient + message
+    public String searchByMessageID(String id) {
+        List<Message> all = new ArrayList<>();
+        all.addAll(sentMessages);
+        all.addAll(storedMessages);
+        all.addAll(disregardedMessages);
+
+        for (Message m : all) {
+            if (m.getMessageID().equals(id)) {
+                return "Recipient: " + m.getRecipient() + "\nMessage: " + m.getMessageText();
+            }
+        }
+        return "Message ID not found.";
+    }
+
+    // d) Search all messages for a given recipient
+    public String searchByRecipient(String recipient) {
+        StringBuilder sb = new StringBuilder();
+        List<Message> all = new ArrayList<>();
+        all.addAll(sentMessages);
+        all.addAll(storedMessages);
+
+        for (Message m : all) {
+            if (m.getRecipient().equals(recipient)) {
+                sb.append("\"").append(m.getMessageText()).append("\"\n");
+            }
+        }
+        return sb.length() == 0 ? "No messages found for " + recipient : sb.toString();
+    }
+
+    // e) Delete a message using its hash
+    public String deleteByHash(String hash) {
+        List<List<Message>> arrays = new ArrayList<>();
+        arrays.add(sentMessages);
+        arrays.add(storedMessages);
+        arrays.add(disregardedMessages);
+
+        for (List<Message> arr : arrays) {
+            for (int i = 0; i < arr.size(); i++) {
+                if (arr.get(i).getMessageHash().equals(hash)) {
+                    String text = arr.get(i).getMessageText();
+                    arr.remove(i);
+                    messageHashes.remove(hash);
+                    return "Message: \"" + text + "\" successfully deleted.";
+                }
+            }
+        }
+        return "Message hash not found.";
+    }
+
+    // f) Full report of all sent messages
+    public String displayReport() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("=========== SENT MESSAGES REPORT ===========\n");
+        for (Message m : sentMessages) {
+            sb.append("Message Hash : ").append(m.getMessageHash()).append("\n");
+            sb.append("Recipient    : ").append(m.getRecipient()).append("\n");
+            sb.append("Message      : ").append(m.getMessageText()).append("\n");
+            sb.append("-".repeat(40)).append("\n");
+        }
+        return sentMessages.isEmpty() ? "No sent messages to report." : sb.toString();
+    }
+
+    // ===== Total (ONE definition only) =====
     public int returnTotalMessages() {
         return numMessagesSent;
     }
 
-    // Stores a message in a JSON file
-    public void storeMessage(Message msg) {
-        String filename = "stored_messages.json";
-        List<Message> storedMessages = new ArrayList<>();
+    // ===== Print (ONE definition only) =====
+    public String printMessages() {
+        return displayReport();
+    }
 
-        try {
-            FileReader reader = new FileReader(filename);
+    // ===== Getters for unit tests =====
+    public List<Message> getSentMessages()        { return sentMessages; }
+    public List<Message> getDisregardedMessages() { return disregardedMessages; }
+    public List<Message> getStoredMessages()      { return storedMessages; }
+    public List<String>  getMessageHashes()       { return messageHashes; }
+    public List<String>  getMessageIDs()          { return messageIDs; }
+
+    // ===== Load from JSON into storedMessages array =====
+    public void loadStoredMessagesFromJSON() {
+        String filename = "stored_messages.json";
+        try (FileReader reader = new FileReader(filename)) {
             Type listType = new TypeToken<ArrayList<Message>>() {}.getType();
             List<Message> existing = new Gson().fromJson(reader, listType);
             if (existing != null) {
                 storedMessages.addAll(existing);
+                for (Message m : existing) {
+                    messageHashes.add(m.getMessageHash());
+                    messageIDs.add(m.getMessageID());
+                }
             }
-            reader.close();
-        } catch (IOException ignored) {
-
-            // The file does not yet exist
+        } catch (IOException e) {
+            System.out.println("No stored messages file found yet.");
         }
+    }
 
-        storedMessages.add(msg);
+    // ===== Store to JSON (ONE definition only) =====
+    public void storeMessage(Message msg) {
+        String filename = "stored_messages.json";
+        List<Message> stored = new ArrayList<>();
 
-        try {
-            FileWriter writer = new FileWriter(filename);
+        try (FileReader reader = new FileReader(filename)) {
+            Type listType = new TypeToken<ArrayList<Message>>() {}.getType();
+            List<Message> existing = new Gson().fromJson(reader, listType);
+            if (existing != null) stored.addAll(existing);
+        } catch (IOException ignored) {}
+
+        stored.add(msg);
+
+        try (FileWriter writer = new FileWriter(filename)) {
             Gson gson = new GsonBuilder().setPrettyPrinting().create();
-            gson.toJson(storedMessages, writer);
-            writer.close();
+            gson.toJson(stored, writer);
             System.out.println("Message saved to " + filename);
         } catch (IOException e) {
             System.out.println("Error storing message: " + e.getMessage());
         }
     }
+
 }
